@@ -1,0 +1,1100 @@
+<!doctype html>
+<html lang="es" data-tema="oscuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>inicio</title>
+<meta name="description" content="Pagina de inicio personal: tus sitios, en un solo lugar.">
+<meta name="theme-color" content="#0b0d10">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+:root{
+  --bg:#0b0d10; --bg2:#11151a; --tarjeta:rgba(255,255,255,.045); --tarjeta-h:rgba(255,255,255,.085);
+  --borde:rgba(255,255,255,.085); --borde-h:rgba(255,255,255,.2);
+  --texto:#e9ecf1; --texto2:#9aa4b2; --texto3:#6b7583;
+  --acento:#4c9aff; --acento2:#2ee6a8;
+  --radio:14px; --sombra:0 10px 30px rgba(0,0,0,.45);
+}
+html[data-tema="claro"]{
+  --bg:#f5f6f8; --bg2:#ffffff; --tarjeta:rgba(0,0,0,.035); --tarjeta-h:rgba(0,0,0,.07);
+  --borde:rgba(0,0,0,.09); --borde-h:rgba(0,0,0,.22);
+  --texto:#12161c; --texto2:#5b6472; --texto3:#8b94a2;
+  --acento:#0b62d6; --acento2:#0a8f6c;
+  --sombra:0 10px 30px rgba(20,30,50,.12);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--texto);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+#fondo{
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(1100px 620px at 50% -12%, rgba(76,154,255,.13), transparent 62%),
+    radial-gradient(760px 480px at 88% 108%, rgba(46,230,168,.08), transparent 60%);
+}
+html[data-tema="claro"] #fondo{
+  background:
+    radial-gradient(1100px 620px at 50% -12%, rgba(11,98,214,.10), transparent 62%),
+    radial-gradient(760px 480px at 88% 108%, rgba(10,143,108,.07), transparent 60%);
+}
+#fondo.imagen::after{
+  content:""; position:absolute; inset:0;
+  background-image:var(--imagen); background-size:cover; background-position:center;
+  opacity:.22; filter:saturate(.9);
+}
+html[data-tema="claro"] #fondo.imagen::after{opacity:.35}
+
+main{max-width:1080px; margin:0 auto; padding:34px 22px 120px}
+
+header{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:26px}
+#saludo{font-size:13px; color:var(--texto2); letter-spacing:.02em; margin:0 0 2px}
+#reloj{font-size:52px; font-weight:250; letter-spacing:-.03em; line-height:1; margin:0;
+  font-variant-numeric:tabular-nums}
+#reloj small{font-size:20px; font-weight:400; color:var(--texto2); margin-left:6px; letter-spacing:0}
+#fecha{font-size:12.5px; color:var(--texto3); margin:7px 0 0}
+#clima{font-size:13px; color:var(--texto2); margin:5px 0 0; min-height:17px}
+#clima b{font-weight:500; color:var(--texto)}
+
+#barra{position:relative; margin-bottom:30px}
+#q{
+  width:100%; padding:15px 18px 15px 48px; font-size:15px; color:var(--texto);
+  background:var(--tarjeta); border:1px solid var(--borde); border-radius:var(--radio);
+  outline:none; transition:border-color .15s, background .15s;
+  font-family:inherit;
+}
+#q::placeholder{color:var(--texto3)}
+#q:focus{border-color:var(--acento); background:var(--tarjeta-h)}
+#lupa{position:absolute; left:16px; top:50%; transform:translateY(-50%); width:17px; height:17px;
+  color:var(--texto3); pointer-events:none}
+#atajo{position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:11px;
+  color:var(--texto3); border:1px solid var(--borde); border-radius:6px; padding:2px 7px;
+  pointer-events:none; font-family:ui-monospace,monospace}
+#q:focus ~ #atajo{display:none}
+
+#panel{
+  position:absolute; top:calc(100% + 8px); left:0; right:0; z-index:40;
+  background:var(--bg2); border:1px solid var(--borde); border-radius:var(--radio);
+  box-shadow:var(--sombra); overflow:hidden; display:none;
+}
+#panel.abierto{display:block}
+.fila{
+  display:flex; align-items:center; gap:11px; padding:10px 15px; cursor:pointer;
+  border-bottom:1px solid var(--borde); font-size:13.5px;
+}
+.fila:last-child{border-bottom:0}
+.fila.activa{background:var(--tarjeta-h)}
+.fila .fav{width:18px; height:18px; flex:0 0 18px; border-radius:4px; object-fit:contain}
+.fila .cat{margin-left:auto; font-size:11px; color:var(--texto3); text-transform:lowercase}
+.fila .ir{font-size:11px; color:var(--acento); opacity:.9}
+.vacio{padding:16px; font-size:13px; color:var(--texto3); text-align:center}
+
+section{margin-bottom:26px; animation:entra .28s ease both}
+@keyframes entra{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){section{animation:none}}
+h2{
+  font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.13em;
+  color:var(--texto3); margin:0 0 11px; display:flex; align-items:center; gap:8px;
+}
+h2::after{content:""; flex:1; height:1px; background:var(--borde)}
+
+.rejilla{display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); gap:9px}
+.tarjeta{
+  position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:8px; padding:14px 8px 11px; min-height:88px; text-decoration:none; color:var(--texto);
+  background:var(--tarjeta); border:1px solid var(--borde); border-radius:12px;
+  transition:transform .12s, background .12s, border-color .12s;
+  cursor:pointer; overflow:hidden;
+}
+.tarjeta:hover,.tarjeta:focus-visible{
+  background:var(--tarjeta-h); border-color:var(--borde-h); transform:translateY(-2px); outline:none;
+}
+.tarjeta.arrastrando{opacity:.35}
+.tarjeta.destino{border-color:var(--acento); border-style:dashed}
+.tarjeta .ico{
+  width:28px; height:28px; border-radius:7px; object-fit:contain; flex:0 0 28px;
+  background:rgba(127,127,127,.10);
+}
+.tarjeta .letra{
+  width:28px; height:28px; border-radius:7px; flex:0 0 28px; display:grid; place-items:center;
+  font-size:14px; font-weight:500; color:#fff;
+}
+.tarjeta .nom{
+  font-size:11.5px; color:var(--texto2); text-align:center; line-height:1.25;
+  max-width:100%; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  word-break:break-word;
+}
+.tarjeta:hover .nom{color:var(--texto)}
+.tarjeta .acc{
+  position:absolute; top:3px; right:3px; display:none; gap:1px;
+}
+.tarjeta:hover .acc{display:flex}
+.tarjeta .acc button{
+  width:20px; height:20px; border:0; border-radius:5px; cursor:pointer; font-size:11px;
+  background:rgba(0,0,0,.35); color:#fff; line-height:1; padding:0; display:grid; place-items:center;
+}
+.tarjeta .acc button:hover{background:rgba(0,0,0,.65)}
+html[data-tema="claro"] .tarjeta .acc button{background:rgba(255,255,255,.8); color:#222}
+body.editando .tarjeta{cursor:grab}
+body.editando .tarjeta .acc{display:flex}
+
+#acciones{
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:50;
+  display:flex; align-items:center; gap:4px; padding:6px;
+  background:color-mix(in srgb, var(--bg2) 88%, transparent);
+  border:1px solid var(--borde); border-radius:999px; box-shadow:var(--sombra);
+  backdrop-filter:blur(14px);
+}
+#acciones button{
+  width:36px; height:36px; border:0; border-radius:999px; background:transparent;
+  color:var(--texto2); cursor:pointer; display:grid; place-items:center; font-size:15px;
+  transition:background .12s, color .12s; font-family:inherit;
+}
+#acciones button:hover{background:var(--tarjeta-h); color:var(--texto)}
+#acciones button.activo{background:var(--acento); color:#fff}
+#b-nube{position:relative}
+#b-nube::after{
+  content:""; position:absolute; top:5px; right:5px; width:6px; height:6px; border-radius:50%;
+  background:var(--texto3); transition:background .2s;
+}
+#b-nube.ok::after{background:var(--acento2)}
+#b-nube.subiendo::after{background:var(--acento); animation:pulso 1s infinite}
+#b-nube.error::after{background:#e24b4a}
+#b-nube.off::after{background:transparent}
+@keyframes pulso{50%{opacity:.25}}
+#nube-resumen{
+  font-size:12.5px; color:var(--texto2); line-height:1.65; background:var(--tarjeta);
+  border:1px solid var(--borde); border-radius:10px; padding:11px 13px; margin:14px 0 0;
+}
+#nube-resumen b{color:var(--texto); font-weight:500}
+#nube-resumen:empty{display:none}
+#n-conectar{background:var(--acento); border-color:var(--acento); color:#fff}
+#nube-resumen a{color:var(--acento)}
+.pista{font-size:11.5px; color:var(--texto3); line-height:1.6; margin:10px 0 0}
+.pista code{font-family:ui-monospace,monospace; font-size:11px; color:var(--texto2)}
+#acciones .sep{width:1px; height:20px; background:var(--borde); margin:0 2px}
+#acciones svg{width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round}
+
+dialog{
+  border:1px solid var(--borde); border-radius:16px; padding:0; background:var(--bg2);
+  color:var(--texto); width:min(430px,calc(100vw - 32px)); box-shadow:var(--sombra);
+}
+dialog::backdrop{background:rgba(0,0,0,.55); backdrop-filter:blur(3px)}
+dialog form{padding:22px}
+dialog h3{margin:0 0 16px; font-size:15px; font-weight:500}
+dialog label{display:block; font-size:11.5px; color:var(--texto3); margin:12px 0 5px;
+  text-transform:uppercase; letter-spacing:.08em}
+dialog input,dialog select{
+  width:100%; padding:10px 12px; font-size:14px; font-family:inherit;
+  background:var(--tarjeta); border:1px solid var(--borde); border-radius:9px;
+  color:var(--texto); outline:none;
+}
+dialog input:focus,dialog select:focus{border-color:var(--acento)}
+dialog menu{display:flex; gap:8px; justify-content:flex-end; margin:20px 0 0; padding:0}
+dialog button{
+  padding:9px 16px; font-size:13.5px; font-family:inherit; border-radius:9px; cursor:pointer;
+  border:1px solid var(--borde); background:transparent; color:var(--texto);
+}
+dialog button[value="guardar"]{background:var(--acento); border-color:var(--acento); color:#fff}
+dialog button:hover{filter:brightness(1.12)}
+#ayuda{font-size:12px; color:var(--texto3); line-height:1.7}
+#ayuda kbd{
+  font-family:ui-monospace,monospace; font-size:11px; border:1px solid var(--borde);
+  border-radius:5px; padding:1px 5px; color:var(--texto2);
+}
+#aviso{
+  position:fixed; bottom:74px; left:50%; transform:translateX(-50%) translateY(10px);
+  background:var(--texto); color:var(--bg); font-size:12.5px; padding:8px 15px; border-radius:999px;
+  opacity:0; pointer-events:none; transition:.22s; z-index:60; white-space:nowrap;
+}
+#aviso.ver{opacity:1; transform:translateX(-50%) translateY(0)}
+@media (max-width:560px){
+  main{padding:22px 15px 110px}
+  #reloj{font-size:40px}
+  .rejilla{grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:7px}
+  .tarjeta{min-height:80px; padding:12px 6px 9px}
+  #atajo{display:none}
+}
+</style>
+</head>
+<body>
+<div id="fondo"></div>
+
+<main>
+  <header>
+    <div>
+      <p id="saludo">buenos días</p>
+      <h1 id="reloj">--:--</h1>
+      <p id="fecha"></p>
+      <p id="clima"></p>
+    </div>
+  </header>
+
+  <div id="barra">
+    <svg id="lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="text" placeholder="buscar en tus sitios, o escribe para buscar en la web"
+           autocomplete="off" spellcheck="false" enterkeyhint="go">
+    <span id="atajo">/</span>
+    <div id="panel" role="listbox"></div>
+  </div>
+
+  <div id="contenido"></div>
+</main>
+
+<div id="acciones">
+  <button id="b-agregar" title="agregar sitio (n)">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+  <button id="b-editar" title="modo edición (e)">
+    <svg viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="m14 6 4 4"/></svg>
+  </button>
+  <span class="sep"></span>
+  <button id="b-importar" title="importar marcadores de Chrome">
+    <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 21h16"/></svg>
+  </button>
+  <button id="b-exportar" title="exportar datos.json">
+    <svg viewBox="0 0 24 24"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 21h16"/></svg>
+  </button>
+  <span class="sep"></span>
+  <button id="b-nube" class="off" title="guardar en la nube (GitHub)">
+    <svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1 0-8 5.5 5.5 0 0 1 10.6-1.5A3.5 3.5 0 0 1 18 18H7z"/></svg>
+  </button>
+  <button id="b-tema" title="tema">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
+  </button>
+  <button id="b-ayuda" title="atajos">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7"/><path d="M12 17h.01"/></svg>
+  </button>
+</div>
+
+<div id="aviso"></div>
+
+<dialog id="dlg">
+  <form method="dialog" id="form">
+    <h3 id="dlg-titulo">agregar sitio</h3>
+    <label for="f-nom">nombre</label>
+    <input id="f-nom" type="text" required maxlength="40" placeholder="youtube">
+    <label for="f-url">dirección</label>
+    <input id="f-url" type="text" required placeholder="youtube.com">
+    <label for="f-cat">categoría</label>
+    <input id="f-cat" type="text" list="lista-cat" maxlength="24" placeholder="música">
+    <datalist id="lista-cat"></datalist>
+    <menu>
+      <button value="cancelar" type="submit">cancelar</button>
+      <button value="guardar" type="submit">guardar</button>
+    </menu>
+  </form>
+</dialog>
+
+<dialog id="dlg-ayuda">
+  <form method="dialog">
+    <h3>atajos</h3>
+    <div id="ayuda">
+      <p><kbd>/</kbd> o <kbd>ctrl</kbd>+<kbd>k</kbd> — buscar<br>
+      <kbd>enter</kbd> — abrir el primero<br>
+      <kbd>↑</kbd> <kbd>↓</kbd> — moverse por resultados<br>
+      <kbd>n</kbd> — nuevo sitio<br>
+      <kbd>e</kbd> — modo edición (borrar y arrastrar)<br>
+      <kbd>esc</kbd> — cerrar</p>
+      <p>prefijos en el buscador: <kbd>g</kbd> google · <kbd>yt</kbd> youtube ·
+      <kbd>w</kbd> wikipedia · <kbd>gh</kbd> github · <kbd>ddg</kbd> duckduckgo</p>
+      <p>los datos viven en <b>datos.json</b>. sin nube configurada, lo que edites se guarda
+      solo en este navegador. con la nube (botón de nube), cada cambio se sube al repo y
+      aparece en todos tus dispositivos.</p>
+    </div>
+    <menu><button value="cerrar" type="submit">cerrar</button></menu>
+  </form>
+</dialog>
+
+<dialog id="dlg-nube">
+  <form method="dialog">
+    <h3>guardar en la nube</h3>
+    <p class="pista">Así lo que edites aquí aparece en el celular y en cualquier navegador.
+      Se guarda en <code>datos.json</code> de tu repo, con historial de cambios.</p>
+    <label for="n-token">token de github</label>
+    <input id="n-token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_...">
+    <p class="pista">Token <b>fine-grained</b> · repo <code>inicio</code> · permiso
+      <code>Contents: Read and write</code> ·
+      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">crear token</a></p>
+    <div id="nube-resumen"></div>
+    <menu>
+      <button value="cerrar" type="submit">cerrar</button>
+      <button id="n-conectar" type="button">conectar</button>
+    </menu>
+  </form>
+</dialog>
+
+<input type="file" id="archivo" accept=".html,.htm,.json" hidden>
+
+<script>
+"use strict";
+
+const CLAVE = "inicio.datos.v1";
+const CLAVE_TEMA = "inicio.tema";
+const CLAVE_CLIMA = "inicio.clima";
+
+const MOTORES = {
+  g:   { nombre: "google",     url: "https://www.google.com/search?q=" },
+  yt:  { nombre: "youtube",    url: "https://www.youtube.com/results?search_query=" },
+  w:   { nombre: "wikipedia",  url: "https://es.wikipedia.org/w/index.php?search=" },
+  gh:  { nombre: "github",     url: "https://github.com/search?q=" },
+  ddg: { nombre: "duckduckgo", url: "https://duckduckgo.com/?q=" }
+};
+
+const SEMILLA = {
+  config: { titulo: "inicio", imagen: "" },
+  categorias: [
+    { nombre: "diario", sitios: [
+      { n: "youtube",   u: "https://www.youtube.com" },
+      { n: "gmail",     u: "https://mail.google.com" },
+      { n: "whatsapp",  u: "https://web.whatsapp.com" },
+      { n: "github",    u: "https://github.com" },
+      { n: "clima",     u: "https://www.wunderground.com" },
+      { n: "drive",     u: "https://drive.google.com" }
+    ]},
+    { nombre: "trabajo", sitios: [
+      { n: "chatgpt",   u: "https://chatgpt.com" },
+      { n: "claude",    u: "https://claude.ai" },
+      { n: "figma",     u: "https://figma.com" },
+      { n: "vercel",    u: "https://vercel.com/dashboard" },
+      { n: "cloudflare",u: "https://dash.cloudflare.com" },
+      { n: "docs",      u: "https://docs.google.com" }
+    ]},
+    { nombre: "oír", sitios: [
+      { n: "spotify",   u: "https://open.spotify.com" },
+      { n: "bandcamp",  u: "https://bandcamp.com" },
+      { n: "soundcloud",u: "https://soundcloud.com" },
+      { n: "radio",     u: "https://www.radio-browser.info" }
+    ]},
+    { nombre: "leer", sitios: [
+      { n: "wikipedia", u: "https://es.wikipedia.org" },
+      { n: "hacker news",u: "https://news.ycombinator.com" },
+      { n: "archive",   u: "https://archive.org" },
+      { n: "rae",       u: "https://dle.rae.es" }
+    ]}
+  ]
+};
+
+let estado = null;
+let editando = false;
+let resultados = [];
+let sel = -1;
+
+const $ = (s) => document.querySelector(s);
+const el = (t, c) => { const x = document.createElement(t); if (c) x.className = c; return x; };
+
+function normalizar(u) {
+  if (!u) return "";
+  u = u.trim();
+  if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+  return u;
+}
+function dominio(u) {
+  try { return new URL(normalizar(u)).hostname.replace(/^www\./, ""); }
+  catch { return ""; }
+}
+function favicon(u, tam) {
+  return "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(dominio(u)) + "&sz=" + (tam || 64);
+}
+function colorDe(txt) {
+  let h = 0;
+  for (let i = 0; i < txt.length; i++) h = (h * 31 + txt.charCodeAt(i)) % 360;
+  return "hsl(" + h + " 52% 42%)";
+}
+function aviso(t) {
+  const a = $("#aviso");
+  a.textContent = t;
+  a.classList.add("ver");
+  clearTimeout(aviso._t);
+  aviso._t = setTimeout(() => a.classList.remove("ver"), 1900);
+}
+
+function cargar() {
+  const guardado = localStorage.getItem(CLAVE);
+  if (guardado) {
+    try { estado = JSON.parse(guardado); } catch {}
+  }
+  if (!estado) estado = JSON.parse(JSON.stringify(SEMILLA));
+
+  if (cfgNube()) { cargarNube(); return; }
+
+  fetch("datos.json", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => {
+      if (!d || !Array.isArray(d.categorias)) return;
+      if (localStorage.getItem(CLAVE_PEND)) return;
+      estado = d;
+      guardarLocal();
+      pintar();
+    })
+    .catch(() => {});
+}
+function guardarLocal() {
+  localStorage.setItem(CLAVE, JSON.stringify(estado));
+}
+function guardar() {
+  guardarLocal();
+  marcarPendiente();
+}
+
+const CLAVE_NUBE = "inicio.nube.v1";
+const CLAVE_PEND = "inicio.pendiente.v1";
+const NUBE = { repo: "sanluispropublicidad-ai/inicio", rama: "main", ruta: "datos.json" };
+let subiendo = false;
+let timerSubida = null;
+
+function cfgNube() {
+  let c;
+  try { c = JSON.parse(localStorage.getItem(CLAVE_NUBE) || "null"); } catch { return null; }
+  if (!c || !c.token) return null;
+  return { token: c.token, repo: NUBE.repo, rama: NUBE.rama, ruta: NUBE.ruta, sha: c.sha || null };
+}
+function setCfgNube(c) {
+  if (c) localStorage.setItem(CLAVE_NUBE, JSON.stringify(c));
+  else localStorage.removeItem(CLAVE_NUBE);
+  estadoNube(cfgNube() ? (localStorage.getItem(CLAVE_PEND) ? "subiendo" : "ok") : "off");
+}
+function estadoNube(t) {
+  const b = $("#b-nube");
+  b.className = t;
+  b.title = t === "ok" ? "al día en la nube"
+    : t === "subiendo" ? "subiendo cambios..."
+    : t === "error" ? "error al sincronizar (clic para revisar)"
+    : "sin nube: solo se guarda en este navegador (clic para configurar)";
+}
+function cabecerasNube(c) {
+  return {
+    Authorization: "Bearer " + c.token,
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28"
+  };
+}
+function aBase64(txt) {
+  const bytes = new TextEncoder().encode(txt);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function deBase64(b) {
+  const bin = atob(String(b).replace(/\s/g, ""));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+async function nubeLeer(c) {
+  const url = "https://api.github.com/repos/" + c.repo + "/contents/" + c.ruta +
+    "?ref=" + encodeURIComponent(c.rama) + "&t=" + Date.now();
+  const r = await fetch(url, { headers: cabecerasNube(c), cache: "no-store" });
+  if (r.status === 401) throw new Error("token inválido o vencido");
+  if (r.status === 403) throw new Error("el token no tiene permiso de escritura");
+  if (r.status === 404) throw new Error("no encontré " + c.ruta + " en " + c.repo);
+  if (!r.ok) throw new Error("github respondió " + r.status);
+  const j = await r.json();
+  return { datos: JSON.parse(deBase64(j.content)), sha: j.sha };
+}
+
+async function nubeEscribir(c, datos, sha, mensaje) {
+  const url = "https://api.github.com/repos/" + c.repo + "/contents/" + c.ruta;
+  const cuerpo = {
+    message: mensaje,
+    content: aBase64(JSON.stringify(datos, null, 2)),
+    branch: c.rama
+  };
+  if (sha) cuerpo.sha = sha;
+  const r = await fetch(url, {
+    method: "PUT",
+    headers: { ...cabecerasNube(c), "Content-Type": "application/json" },
+    body: JSON.stringify(cuerpo)
+  });
+  if (r.status === 409 || r.status === 422) throw new Error("conflicto: otro dispositivo guardó antes");
+  if (r.status === 401) throw new Error("token inválido o vencido");
+  if (!r.ok) throw new Error("github respondió " + r.status);
+  const j = await r.json();
+  return j.content.sha;
+}
+
+let avisadoSinNube = false;
+
+function marcarPendiente() {
+  if (!cfgNube()) {
+    if (!avisadoSinNube) {
+      avisadoSinNube = true;
+      aviso("sin nube: esto se pierde al recargar");
+    }
+    return;
+  }
+  localStorage.setItem(CLAVE_PEND, "1");
+  estadoNube("subiendo");
+  clearTimeout(timerSubida);
+  timerSubida = setTimeout(subirAhora, 1400);
+}
+
+function fusionar(local, remoto) {
+  const salida = JSON.parse(JSON.stringify(remoto || { categorias: [] }));
+  if (!Array.isArray(salida.categorias)) salida.categorias = [];
+  salida.config = { ...(remoto && remoto.config ? remoto.config : {}), ...(local.config || {}) };
+  (local.categorias || []).forEach((cl) => {
+    let cr = salida.categorias.find((c) => c.nombre === cl.nombre);
+    if (!cr) {
+      salida.categorias.push(JSON.parse(JSON.stringify(cl)));
+      return;
+    }
+    const urls = new Set((cr.sitios || []).map((s) => s.u));
+    (cl.sitios || []).forEach((s) => {
+      if (urls.has(s.u)) {
+        const ex = cr.sitios.find((x) => x.u === s.u);
+        if (ex && ex.n !== s.n) ex.n = s.n;
+      } else {
+        cr.sitios.push({ n: s.n, u: s.u });
+        urls.add(s.u);
+      }
+    });
+  });
+  return salida;
+}
+
+async function subirAhora() {
+  const c = cfgNube();
+  if (!c) return;
+  if (subiendo) { clearTimeout(timerSubida); timerSubida = setTimeout(subirAhora, 1200); return; }
+  subiendo = true;
+  estadoNube("subiendo");
+  try {
+    const marca = new Date().toISOString().slice(0, 16).replace("T", " ");
+    let sha = c.sha;
+    try {
+      sha = await nubeEscribir(c, estado, sha, "datos: " + marca);
+    } catch (e) {
+      if (!/conflicto/.test(e.message)) throw e;
+      const rem = await nubeLeer(c);
+      estado = fusionar(estado, rem.datos);
+      guardarLocal();
+      pintar();
+      sha = await nubeEscribir(c, estado, rem.sha, "datos: " + marca + " (fusionado)");
+      aviso("se fusionaron cambios de otro dispositivo");
+    }
+    c.sha = sha;
+    setCfgNube(c);
+    localStorage.removeItem(CLAVE_PEND);
+    estadoNube("ok");
+  } catch (e) {
+    estadoNube("error");
+    aviso("no se guardó en la nube: " + e.message);
+  } finally {
+    subiendo = false;
+  }
+}
+
+async function cargarNube() {
+  const c = cfgNube();
+  if (!c) return false;
+  try {
+    const rem = await nubeLeer(c);
+    c.sha = rem.sha;
+    setCfgNube(c);
+    if (localStorage.getItem(CLAVE_PEND)) { subirAhora(); return true; }
+    estado = rem.datos;
+    guardarLocal();
+    pintar();
+    estadoNube("ok");
+    return true;
+  } catch (e) {
+    estadoNube("error");
+    aviso("nube: " + e.message);
+    return false;
+  }
+}
+
+function crearTarjeta(sitio, cat) {
+  const a = el("a", "tarjeta");
+  a.href = normalizar(sitio.u);
+  a.title = sitio.n + " — " + dominio(sitio.u);
+  a.draggable = editando;
+  a.dataset.cat = cat;
+
+  const img = el("img", "ico");
+  img.src = favicon(sitio.u, 64);
+  img.alt = "";
+  img.loading = "lazy";
+  img.referrerPolicy = "no-referrer";
+  img.onerror = () => {
+    const l = el("span", "letra");
+    l.textContent = (sitio.n || "?").trim().charAt(0).toUpperCase();
+    l.style.background = colorDe(sitio.n || "x");
+    img.replaceWith(l);
+  };
+  a.appendChild(img);
+
+  const nom = el("span", "nom");
+  nom.textContent = sitio.n;
+  a.appendChild(nom);
+
+  const acc = el("span", "acc");
+  const bEd = el("button");
+  bEd.textContent = "✎";
+  bEd.title = "editar";
+  bEd.onclick = (e) => { e.preventDefault(); e.stopPropagation(); abrirFormulario(cat, sitio); };
+  const bBo = el("button");
+  bBo.textContent = "×";
+  bBo.title = "borrar";
+  bBo.onclick = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const c = estado.categorias.find((x) => x.nombre === cat);
+    if (!c) return;
+    c.sitios = c.sitios.filter((x) => x !== sitio);
+    guardar(); pintar(); aviso("borrado: " + sitio.n);
+  };
+  acc.append(bEd, bBo);
+  a.appendChild(acc);
+
+  a.addEventListener("dragstart", (e) => {
+    if (!editando) { e.preventDefault(); return; }
+    a.classList.add("arrastrando");
+    e.dataTransfer.setData("text/plain", JSON.stringify({ cat, u: sitio.u }));
+  });
+  a.addEventListener("dragend", () => {
+    a.classList.remove("arrastrando");
+    document.querySelectorAll(".destino").forEach((x) => x.classList.remove("destino"));
+  });
+  a.addEventListener("dragover", (e) => {
+    if (!editando) return;
+    e.preventDefault();
+    a.classList.add("destino");
+  });
+  a.addEventListener("dragleave", () => a.classList.remove("destino"));
+  a.addEventListener("drop", (e) => {
+    if (!editando) return;
+    e.preventDefault();
+    a.classList.remove("destino");
+    let origen;
+    try { origen = JSON.parse(e.dataTransfer.getData("text/plain")); } catch { return; }
+    if (!origen || origen.u === sitio.u) return;
+    const cOri = estado.categorias.find((x) => x.nombre === origen.cat);
+    const cDes = estado.categorias.find((x) => x.nombre === cat);
+    if (!cOri || !cDes) return;
+    const idx = cOri.sitios.findIndex((x) => x.u === origen.u);
+    if (idx < 0) return;
+    const movido = cOri.sitios.splice(idx, 1)[0];
+    const destinoIdx = cDes.sitios.indexOf(sitio);
+    cDes.sitios.splice(destinoIdx, 0, movido);
+    guardar(); pintar();
+  });
+  return a;
+}
+
+function pintar() {
+  const cont = $("#contenido");
+  cont.textContent = "";
+  estado.categorias.forEach((cat) => {
+    if (!cat.sitios || !cat.sitios.length) return;
+    const sec = el("section");
+    const h = el("h2");
+    h.textContent = cat.nombre;
+    sec.appendChild(h);
+    const rej = el("div", "rejilla");
+    cat.sitios.forEach((s) => rej.appendChild(crearTarjeta(s, cat.nombre)));
+    sec.appendChild(rej);
+    cont.appendChild(sec);
+  });
+  const dl = $("#lista-cat");
+  dl.textContent = "";
+  estado.categorias.forEach((c) => {
+    const o = document.createElement("option");
+    o.value = c.nombre;
+    dl.appendChild(o);
+  });
+  document.body.classList.toggle("editando", editando);
+  $("#b-editar").classList.toggle("activo", editando);
+}
+
+function todos() {
+  const out = [];
+  estado.categorias.forEach((c) => (c.sitios || []).forEach((s) => out.push({ ...s, cat: c.nombre })));
+  return out;
+}
+
+function buscar(txt) {
+  const q = txt.trim().toLowerCase();
+  const panel = $("#panel");
+  panel.textContent = "";
+  resultados = [];
+  sel = -1;
+
+  if (!q) { panel.classList.remove("abierto"); return; }
+
+  const partes = q.split(/\s+/);
+  const pre = partes[0];
+  if (MOTORES[pre] && partes.length > 1) {
+    const term = partes.slice(1).join(" ");
+    resultados = [{ n: "buscar " + term + " en " + MOTORES[pre].nombre,
+                    u: MOTORES[pre].url + encodeURIComponent(term), cat: "web", motor: true }];
+  } else {
+    const palabras = q.split(/\s+/);
+    resultados = todos()
+      .map((s) => {
+        const n = s.n.toLowerCase();
+        const d = dominio(s.u).toLowerCase();
+        let p = 0;
+        if (n === q || d === q) p = 100;
+        else if (n.startsWith(q) || d.startsWith(q)) p = 70;
+        else if (n.includes(q) || d.includes(q)) p = 40;
+        else if (palabras.every((w) => n.includes(w) || d.includes(w) || s.cat.toLowerCase().includes(w))) p = 20;
+        return { s, p };
+      })
+      .filter((x) => x.p > 0)
+      .sort((a, b) => b.p - a.p)
+      .map((x) => x.s);
+
+    if (!resultados.length) {
+      resultados = [{ n: "buscar \"" + txt.trim() + "\" en google",
+                      u: MOTORES.g.url + encodeURIComponent(txt.trim()), cat: "web", motor: true }];
+    }
+  }
+
+  resultados.slice(0, 9).forEach((r, i) => {
+    const f = el("div", "fila");
+    f.dataset.i = i;
+    if (r.motor) {
+      const ico = el("span", "fav");
+      ico.textContent = "↗";
+      ico.style.color = "var(--acento)";
+      ico.style.textAlign = "center";
+      f.appendChild(ico);
+    } else {
+      const img = el("img", "fav");
+      img.src = favicon(r.u, 32);
+      img.alt = "";
+      img.onerror = () => { img.style.visibility = "hidden"; };
+      f.appendChild(img);
+    }
+    const nom = el("span");
+    nom.textContent = r.n;
+    f.appendChild(nom);
+    const cat = el("span", "cat");
+    cat.textContent = r.cat;
+    f.appendChild(cat);
+    if (i === 0) {
+      const ir = el("span", "ir");
+      ir.textContent = "enter ↵";
+      f.appendChild(ir);
+    }
+    f.onmouseenter = () => marcar(i);
+    f.onclick = () => abrir(r);
+    panel.appendChild(f);
+  });
+
+  panel.classList.add("abierto");
+  if (resultados.length) marcar(0);
+}
+
+function marcar(i) {
+  sel = i;
+  document.querySelectorAll("#panel .fila").forEach((f, j) => f.classList.toggle("activa", j === i));
+}
+
+function abrir(r) {
+  if (!r) return;
+  window.location.href = normalizar(r.u);
+}
+
+function abrirFormulario(cat, sitio) {
+  const dlg = $("#dlg");
+  $("#dlg-titulo").textContent = sitio ? "editar sitio" : "agregar sitio";
+  $("#f-nom").value = sitio ? sitio.n : "";
+  $("#f-url").value = sitio ? sitio.u : "";
+  $("#f-cat").value = cat || (estado.categorias[0] && estado.categorias[0].nombre) || "diario";
+  dlg.dataset.original = sitio ? JSON.stringify({ cat, u: sitio.u }) : "";
+  dlg.showModal();
+  setTimeout(() => $("#f-nom").focus(), 40);
+}
+
+$("#form").addEventListener("submit", (e) => {
+  const dlg = $("#dlg");
+  const boton = e.submitter ? e.submitter.value : "cancelar";
+  if (boton !== "guardar") return;
+
+  const nom = $("#f-nom").value.trim();
+  const url = normalizar($("#f-url").value.trim());
+  const cat = ($("#f-cat").value.trim() || "otros").toLowerCase();
+  if (!nom || !url) return;
+
+  let catObj = estado.categorias.find((c) => c.nombre === cat);
+  if (!catObj) {
+    catObj = { nombre: cat, sitios: [] };
+    estado.categorias.push(catObj);
+  }
+
+  const original = dlg.dataset.original ? JSON.parse(dlg.dataset.original) : null;
+  if (original) {
+    const cOri = estado.categorias.find((c) => c.nombre === original.cat);
+    if (cOri) cOri.sitios = cOri.sitios.filter((s) => s.u !== original.u);
+  }
+  catObj.sitios.push({ n: nom, u: url });
+
+  guardar(); pintar();
+  aviso(original ? "actualizado: " + nom : "agregado: " + nom);
+});
+
+function importar(texto, esJson) {
+  if (esJson) {
+    let d;
+    try { d = JSON.parse(texto); } catch { return aviso("json inválido"); }
+    if (!d || !Array.isArray(d.categorias)) return aviso("formato desconocido");
+    estado = d; guardar(); pintar();
+    return aviso("importados " + todos().length + " sitios");
+  }
+  const doc = new DOMParser().parseFromString(texto, "text/html");
+  const nuevos = [];
+  doc.querySelectorAll("a[href]").forEach((a) => {
+    const u = a.getAttribute("href") || "";
+    if (!/^https?:/i.test(u)) return;
+    const nom = (a.textContent || "").trim() || dominio(u);
+    const carpeta = a.closest("dl") ? (a.closest("dl").previousElementSibling || {}) : null;
+    let cat = "importados";
+    const h3 = a.parentElement && a.parentElement.previousElementSibling;
+    if (h3 && h3.tagName === "H3") cat = h3.textContent.trim().toLowerCase();
+    else if (carpeta && carpeta.textContent) cat = carpeta.textContent.trim().toLowerCase();
+    nuevos.push({ n: nom, u, cat });
+  });
+  if (!nuevos.length) return aviso("no encontré marcadores en ese archivo");
+
+  const vistos = new Set(todos().map((s) => s.u));
+  let n = 0;
+  nuevos.forEach((s) => {
+    if (vistos.has(s.u)) return;
+    vistos.add(s.u);
+    let c = estado.categorias.find((x) => x.nombre === s.cat);
+    if (!c) { c = { nombre: s.cat, sitios: [] }; estado.categorias.push(c); }
+    c.sitios.push({ n: s.n, u: s.u });
+    n++;
+  });
+  guardar(); pintar();
+  aviso("importados " + n + " sitios");
+}
+
+$("#archivo").addEventListener("change", (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const lector = new FileReader();
+  lector.onload = () => importar(String(lector.result), /\.json$/i.test(f.name));
+  lector.readAsText(f);
+  e.target.value = "";
+});
+
+$("#b-agregar").onclick = () => abrirFormulario();
+$("#b-editar").onclick = () => {
+  editando = !editando;
+  pintar();
+  aviso(editando ? "modo edición: arrastra para ordenar" : "modo edición apagado");
+};
+$("#b-importar").onclick = () => $("#archivo").click();
+$("#b-exportar").onclick = () => {
+  const blob = new Blob([JSON.stringify(estado, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "datos.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  aviso("exportado datos.json");
+};
+$("#b-tema").onclick = () => {
+  const nuevo = document.documentElement.dataset.tema === "oscuro" ? "claro" : "oscuro";
+  document.documentElement.dataset.tema = nuevo;
+  localStorage.setItem(CLAVE_TEMA, nuevo);
+};
+$("#b-ayuda").onclick = () => $("#dlg-ayuda").showModal();
+
+function contar(d) {
+  let n = 0;
+  ((d && d.categorias) || []).forEach((c) => (n += (c.sitios || []).length));
+  return n;
+}
+
+$("#b-nube").onclick = () => {
+  const c = cfgNube();
+  $("#n-token").value = c ? c.token : "";
+  const res = $("#nube-resumen");
+  res.textContent = c ? "conectado. puedes cambiar el token o reconectar." : "";
+  $("#dlg-nube").showModal();
+};
+
+$("#n-conectar").onclick = async () => {
+  const c = {
+    token: $("#n-token").value.trim(),
+    repo: NUBE.repo,
+    rama: NUBE.rama,
+    ruta: NUBE.ruta,
+    sha: null
+  };
+  const res = $("#nube-resumen");
+  if (!c.token) { res.textContent = "falta el token"; return; }
+  res.textContent = "probando...";
+  let rem;
+  try {
+    rem = await nubeLeer(c);
+  } catch (e) {
+    res.textContent = e.message;
+    return;
+  }
+  c.sha = rem.sha;
+
+  const nRem = contar(rem.datos);
+  const nLoc = contar(estado);
+  res.textContent = "";
+
+  const linea = document.createElement("div");
+  linea.innerHTML = "en el repo: <b>" + nRem + "</b> sitios · aquí: <b>" + nLoc + "</b> sitios";
+  res.appendChild(linea);
+
+  const caja = document.createElement("div");
+  caja.style.cssText = "display:flex; gap:8px; margin-top:11px";
+
+  const bajar = document.createElement("button");
+  bajar.type = "button";
+  bajar.textContent = "usar los del repo";
+  bajar.onclick = () => {
+    estado = rem.datos;
+    guardarLocal();
+    localStorage.removeItem(CLAVE_PEND);
+    setCfgNube(c);
+    pintar();
+    $("#dlg-nube").close();
+    aviso("bajados " + nRem + " sitios del repo");
+  };
+
+  const subir = document.createElement("button");
+  subir.type = "button";
+  subir.textContent = "subir los míos";
+  subir.style.cssText = "background:var(--acento); border-color:var(--acento); color:#fff";
+  subir.onclick = async () => {
+    subir.disabled = true;
+    subir.textContent = "subiendo...";
+    try {
+      const sha = await nubeEscribir(c, estado, rem.sha, "datos: conectar dispositivo");
+      c.sha = sha;
+      localStorage.removeItem(CLAVE_PEND);
+      setCfgNube(c);
+      $("#dlg-nube").close();
+      aviso("subidos " + nLoc + " sitios al repo");
+    } catch (e) {
+      subir.disabled = false;
+      subir.textContent = "subir los míos";
+      linea.textContent = e.message;
+    }
+  };
+
+  caja.append(bajar, subir);
+  res.appendChild(caja);
+};
+
+$("#q").addEventListener("input", (e) => buscar(e.target.value));
+$("#q").addEventListener("focus", (e) => { if (e.target.value) buscar(e.target.value); });
+
+document.addEventListener("keydown", (e) => {
+  const q = $("#q");
+  const activo = document.activeElement;
+  const escribiendo = activo && (activo.tagName === "INPUT" || activo.tagName === "SELECT");
+  const panelAbierto = $("#panel").classList.contains("abierto");
+
+  if (e.key === "Escape") {
+    if (panelAbierto) { q.value = ""; buscar(""); q.blur(); }
+    return;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+    e.preventDefault(); q.focus(); q.select(); return;
+  }
+  if (!escribiendo && e.key === "/") { e.preventDefault(); q.focus(); return; }
+
+  if (panelAbierto && resultados.length) {
+    if (e.key === "ArrowDown") { e.preventDefault(); marcar(Math.min(sel + 1, resultados.length - 1)); return; }
+    if (e.key === "ArrowUp") { e.preventDefault(); marcar(Math.max(sel - 1, 0)); return; }
+    if (e.key === "Enter") { e.preventDefault(); abrir(resultados[Math.max(sel, 0)]); return; }
+  }
+  if (escribiendo) return;
+  if (e.key.toLowerCase() === "n") { e.preventDefault(); abrirFormulario(); }
+  if (e.key.toLowerCase() === "e") { e.preventDefault(); $("#b-editar").click(); }
+});
+
+function reloj() {
+  const ahora = new Date();
+  const h = ahora.getHours();
+  const saludo = h < 6 ? "buenas noches" : h < 12 ? "buenos días" : h < 19 ? "buenas tardes" : "buenas noches";
+  $("#saludo").textContent = saludo;
+  const hh = String(h).padStart(2, "0");
+  const mm = String(ahora.getMinutes()).padStart(2, "0");
+  $("#reloj").textContent = hh + ":" + mm;
+  const f = ahora.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" });
+  $("#fecha").textContent = f.charAt(0).toUpperCase() + f.slice(1);
+}
+setInterval(reloj, 15000);
+reloj();
+
+function clima() {
+  if (!localStorage.getItem(CLAVE_CLIMA)) return;
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude: la, longitude: lo } = pos.coords;
+    try {
+      const r = await fetch("https://api.open-meteo.com/v1/forecast?latitude=" + la +
+        "&longitude=" + lo + "&current=temperature_2m,weather_code&timezone=auto");
+      const d = await r.json();
+      const t = Math.round(d.current.temperature_2m);
+      const c = d.current.weather_code;
+      const desc = c === 0 ? "despejado" : c < 4 ? "poco nublado" : c < 50 ? "nublado"
+        : c < 70 ? "lluvia" : c < 80 ? "nieve" : "tormenta";
+      $("#clima").innerHTML = "";
+      const b = document.createElement("b");
+      b.textContent = t + "°";
+      $("#clima").append(b, document.createTextNode(" · " + desc));
+    } catch {}
+  }, () => {}, { timeout: 8000 });
+}
+
+$("#clima").style.cursor = "pointer";
+$("#clima").title = "clic para ver el clima";
+$("#clima").addEventListener("click", () => {
+  localStorage.setItem(CLAVE_CLIMA, "1");
+  $("#clima").textContent = "ubicando...";
+  clima();
+});
+
+const temaGuardado = localStorage.getItem(CLAVE_TEMA);
+if (temaGuardado) document.documentElement.dataset.tema = temaGuardado;
+else if (window.matchMedia("(prefers-color-scheme: light)").matches)
+  document.documentElement.dataset.tema = "claro";
+
+if (location.hash.startsWith("#nube=")) {
+  const t = decodeURIComponent(location.hash.slice(6)).trim();
+  if (t) {
+    setCfgNube({ token: t, sha: null });
+    localStorage.removeItem(CLAVE_PEND);
+    history.replaceState(null, "", location.pathname + location.search);
+    aviso("conectado a la nube");
+  }
+}
+
+estadoNube(cfgNube() ? (localStorage.getItem(CLAVE_PEND) ? "subiendo" : "ok") : "off");
+cargar();
+pintar();
+clima();
+
+if (location.hash.startsWith("#q=")) {
+  const t = decodeURIComponent(location.hash.slice(3));
+  $("#q").value = t;
+  buscar(t);
+}
+if (location.hash === "#nube") $("#b-nube").click();
+
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>
