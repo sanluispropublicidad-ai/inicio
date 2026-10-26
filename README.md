@@ -18,16 +18,30 @@ Página de inicio personal. Tus sitios, en un solo lugar. Un solo archivo, sin b
 Sin esto, lo que edites vive solo en el navegador donde lo editaste. Con esto, cada cambio se
 commitea a `datos.json` y aparece en el celular y en cualquier navegador.
 
-**Una sola vez por dispositivo:**
+**Leer no necesita nada.** En cualquier dispositivo abres la URL y ves tus sitios: la página
+lee `datos.json` del repo en cada carga. El token solo hace falta para **escribir** desde ese
+dispositivo.
+
+**Una sola vez por dispositivo que vaya a editar:**
 
 1. Abre https://github.com/settings/personal-access-tokens/new
 2. Nombre: `inicio`. Expiración: la que quieras (o sin expirar).
 3. **Repository access** → Only select repositories → `inicio`.
 4. **Permissions** → Repository permissions → **Contents: Read and write**. Nada más.
 5. Generate token y copia el `github_pat_...`.
-6. En la página, botón de nube (arriba, junto al tema) → pega el token → **conectar**.
-7. Te muestra cuántos sitios hay en el repo y cuántos aquí. Elige **usar los del repo** o
-   **subir los míos**.
+6. En la página, botón de nube (abajo, junto al tema) → pega el token → **conectar**.
+
+También se puede con un enlace, sin abrir el diálogo:
+
+```
+https://sanluispropublicidad-ai.github.io/inicio/#nube=github_pat_...
+```
+
+Guarda el token, limpia la barra de direcciones y conecta. Útil para configurar el celular sin
+teclear nada.
+
+Al conectar te muestra cuántos sitios hay en el repo y cuántos aquí. Elige **usar los del
+repo** o **subir los míos**.
 
 Desde ahí, cada alta, edición, borrado o arrastre se sube solo (1.4 s después del último
 cambio) con un commit `datos: fecha`. El punto del botón dice el estado: verde al día, azul
@@ -48,16 +62,18 @@ prestada, bórralo al terminar (borrar datos del sitio).
 
 ## Dónde viven los datos
 
-Cuatro capas, en orden:
+1. `datos.json` del repo — **la fuente de verdad**. Se lee en cada carga (sin caché). Si editas
+   desde la web, el commit va aquí.
+2. `localStorage` — copia local para arrancar rápido y funcionar sin red. Se sobrescribe con lo
+   del repo en cada carga.
+3. Exportar/importar — salida manual y respaldo.
 
-1. `datos.json` del repo — la base. Con la nube conectada es la fuente de verdad y se lee por
-   API en cada apertura (sin caché).
-2. `localStorage` — copia local para arrancar rápido y funcionar sin red.
-3. Commit automático — cada edición sube a `datos.json` cuando la nube está conectada.
-4. Exportar/importar — salida manual si no quieres nube o quieres respaldar.
+**Ojo con el orden de despliegue:** `desplegar.sh` clona el repo y **respeta el `datos.json`
+remoto**. No lo pisa con el local. Si alguna vez hay que empujar el local a la fuerza, se hace
+a mano y a sabiendas.
 
-Sin nube, el orden es `datos.json` → `localStorage` → exportar. Con nube, `localStorage` es
-solo caché y la verdad está en el repo.
+Sin nube conectada no hay escritura permanente: lo que edites se pierde al recargar (la página
+avisa la primera vez). Es a propósito — un cambio que no se sube no existe para los demás.
 
 ## Ponerla como página de inicio
 
