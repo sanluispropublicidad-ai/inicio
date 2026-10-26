@@ -919,6 +919,25 @@ if (location.hash.startsWith("#q=")) {
 }
 if (location.hash === "#nube") $("#b-nube").click();
 
+if (location.hash === "#test-sync") {
+  (async () => {
+    try {
+      const a = await nubeLeer();
+      const d = JSON.parse(JSON.stringify(a.datos));
+      d.categorias[0].sitios.push({ n: "zz-web", u: "https://example.com" });
+      const sha = await nubeEscribir(d, a.sha);
+      const b = await nubeLeer();
+      const esta = b.datos.categorias[0].sitios.some((s) => s.n === "zz-web");
+      const d2 = b.datos;
+      d2.categorias[0].sitios = d2.categorias[0].sitios.filter((s) => s.n !== "zz-web");
+      await nubeEscribir(d2, b.sha);
+      document.title = "TEST|put=" + (sha ? "ok" : "no") + "|leido=" + esta + "|limpio=ok";
+    } catch (e) {
+      document.title = "TEST|error=" + e.message;
+    }
+  })();
+}
+
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
 }
