@@ -7,41 +7,105 @@
     {
       "nombre": "diario",
       "sitios": [
-        { "n": "youtube", "u": "https://www.youtube.com" },
-        { "n": "gmail", "u": "https://mail.google.com" },
-        { "n": "whatsapp", "u": "https://web.whatsapp.com" },
-        { "n": "github", "u": "https://github.com" },
-        { "n": "drive", "u": "https://drive.google.com" },
-        { "n": "clima", "u": "https://www.wunderground.com" }
+        {
+          "n": "youtube",
+          "u": "https://www.youtube.com"
+        },
+        {
+          "n": "gmail",
+          "u": "https://mail.google.com"
+        },
+        {
+          "n": "whatsapp",
+          "u": "https://web.whatsapp.com"
+        },
+        {
+          "n": "github",
+          "u": "https://github.com"
+        },
+        {
+          "n": "drive",
+          "u": "https://drive.google.com"
+        },
+        {
+          "n": "clima",
+          "u": "https://www.wunderground.com"
+        },
+        {
+          "n": "zz-prueba",
+          "u": "https://example.com"
+        }
       ]
     },
     {
       "nombre": "trabajo",
       "sitios": [
-        { "n": "chatgpt", "u": "https://chatgpt.com" },
-        { "n": "claude", "u": "https://claude.ai" },
-        { "n": "figma", "u": "https://figma.com" },
-        { "n": "vercel", "u": "https://vercel.com/dashboard" },
-        { "n": "cloudflare", "u": "https://dash.cloudflare.com" },
-        { "n": "docs", "u": "https://docs.google.com" }
+        {
+          "n": "chatgpt",
+          "u": "https://chatgpt.com"
+        },
+        {
+          "n": "claude",
+          "u": "https://claude.ai"
+        },
+        {
+          "n": "figma",
+          "u": "https://figma.com"
+        },
+        {
+          "n": "vercel",
+          "u": "https://vercel.com/dashboard"
+        },
+        {
+          "n": "cloudflare",
+          "u": "https://dash.cloudflare.com"
+        },
+        {
+          "n": "docs",
+          "u": "https://docs.google.com"
+        }
       ]
     },
     {
       "nombre": "oír",
       "sitios": [
-        { "n": "spotify", "u": "https://open.spotify.com" },
-        { "n": "bandcamp", "u": "https://bandcamp.com" },
-        { "n": "soundcloud", "u": "https://soundcloud.com" },
-        { "n": "radio", "u": "https://www.radio-browser.info" }
+        {
+          "n": "spotify",
+          "u": "https://open.spotify.com"
+        },
+        {
+          "n": "bandcamp",
+          "u": "https://bandcamp.com"
+        },
+        {
+          "n": "soundcloud",
+          "u": "https://soundcloud.com"
+        },
+        {
+          "n": "radio",
+          "u": "https://www.radio-browser.info"
+        }
       ]
     },
     {
       "nombre": "leer",
       "sitios": [
-        { "n": "wikipedia", "u": "https://es.wikipedia.org" },
-        { "n": "hacker news", "u": "https://news.ycombinator.com" },
-        { "n": "archive", "u": "https://archive.org" },
-        { "n": "rae", "u": "https://dle.rae.es" }
+        {
+          "n": "wikipedia",
+          "u": "https://es.wikipedia.org"
+        },
+        {
+          "n": "hacker news",
+          "u": "https://news.ycombinator.com"
+        },
+        {
+          "n": "archive",
+          "u": "https://archive.org"
+        },
+        {
+          "n": "rae",
+          "u": "https://dle.rae.es"
+        }
       ]
     }
   ]
