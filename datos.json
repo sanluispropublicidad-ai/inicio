@@ -30,6 +30,10 @@
         {
           "n": "clima",
           "u": "https://www.wunderground.com"
+        },
+        {
+          "n": "zz-api",
+          "u": "https://example.com"
         }
       ]
     },
