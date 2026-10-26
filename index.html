@@ -166,16 +166,6 @@ body.editando .tarjeta .acc{display:flex}
 #b-nube.error::after{background:#e24b4a}
 #b-nube.off::after{background:transparent}
 @keyframes pulso{50%{opacity:.25}}
-#nube-resumen{
-  font-size:12.5px; color:var(--texto2); line-height:1.65; background:var(--tarjeta);
-  border:1px solid var(--borde); border-radius:10px; padding:11px 13px; margin:14px 0 0;
-}
-#nube-resumen b{color:var(--texto); font-weight:500}
-#nube-resumen:empty{display:none}
-#n-conectar{background:var(--acento); border-color:var(--acento); color:#fff}
-#nube-resumen a{color:var(--acento)}
-.pista{font-size:11.5px; color:var(--texto3); line-height:1.6; margin:10px 0 0}
-.pista code{font-family:ui-monospace,monospace; font-size:11px; color:var(--texto2)}
 #acciones .sep{width:1px; height:20px; background:var(--borde); margin:0 2px}
 #acciones svg{width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.7;
   stroke-linecap:round; stroke-linejoin:round}
@@ -312,24 +302,6 @@ dialog button:hover{filter:brightness(1.12)}
   </form>
 </dialog>
 
-<dialog id="dlg-nube">
-  <form method="dialog">
-    <h3>guardar en la nube</h3>
-    <p class="pista">Así lo que edites aquí aparece en el celular y en cualquier navegador.
-      Se guarda en <code>datos.json</code> de tu repo, con historial de cambios.</p>
-    <label for="n-token">token de github</label>
-    <input id="n-token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_...">
-    <p class="pista">Token <b>fine-grained</b> · repo <code>inicio</code> · permiso
-      <code>Contents: Read and write</code> ·
-      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">crear token</a></p>
-    <div id="nube-resumen"></div>
-    <menu>
-      <button value="cerrar" type="submit">cerrar</button>
-      <button id="n-conectar" type="button">conectar</button>
-    </menu>
-  </form>
-</dialog>
-
 <input type="file" id="archivo" accept=".html,.htm,.json" hidden>
 
 <script>
@@ -415,25 +387,26 @@ function aviso(t) {
   aviso._t = setTimeout(() => a.classList.remove("ver"), 1900);
 }
 
-function cargar() {
+async function cargar() {
   const guardado = localStorage.getItem(CLAVE);
   if (guardado) {
     try { estado = JSON.parse(guardado); } catch {}
   }
   if (!estado) estado = JSON.parse(JSON.stringify(SEMILLA));
 
-  if (cfgNube()) { cargarNube(); return; }
+  const ok = await cargarNube();
+  if (ok) return;
 
-  fetch("datos.json", { cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : null))
-    .then((d) => {
-      if (!d || !Array.isArray(d.categorias)) return;
-      if (localStorage.getItem(CLAVE_PEND)) return;
-      estado = d;
-      guardarLocal();
-      pintar();
-    })
-    .catch(() => {});
+  try {
+    const r = await fetch("datos.json", { cache: "no-store" });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (!d || !Array.isArray(d.categorias)) return;
+    if (localStorage.getItem(CLAVE_PEND)) return;
+    estado = d;
+    guardarLocal();
+    pintar();
+  } catch {}
 }
 function guardarLocal() {
   localStorage.setItem(CLAVE, JSON.stringify(estado));
@@ -443,97 +416,45 @@ function guardar() {
   marcarPendiente();
 }
 
-const CLAVE_NUBE = "inicio.nube.v1";
 const CLAVE_PEND = "inicio.pendiente.v1";
-const NUBE = { repo: "sanluispropublicidad-ai/inicio", rama: "main", ruta: "datos.json" };
+const API = "https://ooaz-inicio.vercel.app/api/datos";
 let subiendo = false;
 let timerSubida = null;
+let shaNube = null;
 
-function cfgNube() {
-  let c;
-  try { c = JSON.parse(localStorage.getItem(CLAVE_NUBE) || "null"); } catch { return null; }
-  if (!c || !c.token) return null;
-  return { token: c.token, repo: NUBE.repo, rama: NUBE.rama, ruta: NUBE.ruta, sha: c.sha || null };
-}
-function setCfgNube(c) {
-  if (c) localStorage.setItem(CLAVE_NUBE, JSON.stringify(c));
-  else localStorage.removeItem(CLAVE_NUBE);
-  estadoNube(cfgNube() ? (localStorage.getItem(CLAVE_PEND) ? "subiendo" : "ok") : "off");
-}
 function estadoNube(t) {
   const b = $("#b-nube");
   b.className = t;
   b.title = t === "ok" ? "al día en la nube"
     : t === "subiendo" ? "subiendo cambios..."
-    : t === "error" ? "error al sincronizar (clic para revisar)"
-    : "sin nube: solo se guarda en este navegador (clic para configurar)";
-}
-function cabecerasNube(c) {
-  return {
-    Authorization: "Bearer " + c.token,
-    Accept: "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28"
-  };
-}
-function aBase64(txt) {
-  const bytes = new TextEncoder().encode(txt);
-  let bin = "";
-  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin);
-}
-function deBase64(b) {
-  const bin = atob(String(b).replace(/\s/g, ""));
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return new TextDecoder().decode(bytes);
+    : t === "error" ? "sin conexión con la nube (clic para reintentar)"
+    : "nube";
 }
 
-async function nubeLeer(c) {
-  const url = "https://api.github.com/repos/" + c.repo + "/contents/" + c.ruta +
-    "?ref=" + encodeURIComponent(c.rama) + "&t=" + Date.now();
-  const r = await fetch(url, { headers: cabecerasNube(c), cache: "no-store" });
-  if (r.status === 401) throw new Error("token inválido o vencido");
-  if (r.status === 403) throw new Error("el token no tiene permiso de escritura");
-  if (r.status === 404) throw new Error("no encontré " + c.ruta + " en " + c.repo);
-  if (!r.ok) throw new Error("github respondió " + r.status);
+async function nubeLeer() {
+  const r = await fetch(API + "?t=" + Date.now(), { cache: "no-store" });
+  if (!r.ok) throw new Error("api " + r.status);
   const j = await r.json();
-  return { datos: JSON.parse(deBase64(j.content)), sha: j.sha };
+  return { datos: j.datos, sha: j.sha };
 }
 
-async function nubeEscribir(c, datos, sha, mensaje) {
-  const url = "https://api.github.com/repos/" + c.repo + "/contents/" + c.ruta;
-  const cuerpo = {
-    message: mensaje,
-    content: aBase64(JSON.stringify(datos, null, 2)),
-    branch: c.rama
-  };
-  if (sha) cuerpo.sha = sha;
-  const r = await fetch(url, {
+async function nubeEscribir(datos, sha) {
+  const r = await fetch(API, {
     method: "PUT",
-    headers: { ...cabecerasNube(c), "Content-Type": "application/json" },
-    body: JSON.stringify(cuerpo)
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ datos, sha })
   });
-  if (r.status === 409 || r.status === 422) throw new Error("conflicto: otro dispositivo guardó antes");
-  if (r.status === 401) throw new Error("token inválido o vencido");
-  if (!r.ok) throw new Error("github respondió " + r.status);
+  if (r.status === 409) throw new Error("conflicto");
+  if (!r.ok) throw new Error("api " + r.status);
   const j = await r.json();
-  return j.content.sha;
+  return j.sha;
 }
-
-let avisadoSinNube = false;
 
 function marcarPendiente() {
-  if (!cfgNube()) {
-    if (!avisadoSinNube) {
-      avisadoSinNube = true;
-      aviso("sin nube: esto se pierde al recargar");
-    }
-    return;
-  }
   localStorage.setItem(CLAVE_PEND, "1");
   estadoNube("subiendo");
   clearTimeout(timerSubida);
-  timerSubida = setTimeout(subirAhora, 1400);
+  timerSubida = setTimeout(subirAhora, 1200);
 }
 
 function fusionar(local, remoto) {
@@ -561,27 +482,23 @@ function fusionar(local, remoto) {
 }
 
 async function subirAhora() {
-  const c = cfgNube();
-  if (!c) return;
   if (subiendo) { clearTimeout(timerSubida); timerSubida = setTimeout(subirAhora, 1200); return; }
   subiendo = true;
   estadoNube("subiendo");
   try {
-    const marca = new Date().toISOString().slice(0, 16).replace("T", " ");
-    let sha = c.sha;
+    let sha;
     try {
-      sha = await nubeEscribir(c, estado, sha, "datos: " + marca);
+      sha = await nubeEscribir(estado, shaNube);
     } catch (e) {
       if (!/conflicto/.test(e.message)) throw e;
-      const rem = await nubeLeer(c);
+      const rem = await nubeLeer();
       estado = fusionar(estado, rem.datos);
       guardarLocal();
       pintar();
-      sha = await nubeEscribir(c, estado, rem.sha, "datos: " + marca + " (fusionado)");
+      sha = await nubeEscribir(estado, rem.sha);
       aviso("se fusionaron cambios de otro dispositivo");
     }
-    c.sha = sha;
-    setCfgNube(c);
+    shaNube = sha;
     localStorage.removeItem(CLAVE_PEND);
     estadoNube("ok");
   } catch (e) {
@@ -593,12 +510,9 @@ async function subirAhora() {
 }
 
 async function cargarNube() {
-  const c = cfgNube();
-  if (!c) return false;
   try {
-    const rem = await nubeLeer(c);
-    c.sha = rem.sha;
-    setCfgNube(c);
+    const rem = await nubeLeer();
+    shaNube = rem.sha;
     if (localStorage.getItem(CLAVE_PEND)) { subirAhora(); return true; }
     estado = rem.datos;
     guardarLocal();
@@ -607,7 +521,6 @@ async function cargarNube() {
     return true;
   } catch (e) {
     estadoNube("error");
-    aviso("nube: " + e.message);
     return false;
   }
 }
@@ -911,87 +824,11 @@ $("#b-tema").onclick = () => {
 };
 $("#b-ayuda").onclick = () => $("#dlg-ayuda").showModal();
 
-function contar(d) {
-  let n = 0;
-  ((d && d.categorias) || []).forEach((c) => (n += (c.sitios || []).length));
-  return n;
-}
-
-$("#b-nube").onclick = () => {
-  const c = cfgNube();
-  $("#n-token").value = c ? c.token : "";
-  const res = $("#nube-resumen");
-  res.textContent = c ? "conectado. puedes cambiar el token o reconectar." : "";
-  $("#dlg-nube").showModal();
-};
-
-$("#n-conectar").onclick = async () => {
-  const c = {
-    token: $("#n-token").value.trim(),
-    repo: NUBE.repo,
-    rama: NUBE.rama,
-    ruta: NUBE.ruta,
-    sha: null
-  };
-  const res = $("#nube-resumen");
-  if (!c.token) { res.textContent = "falta el token"; return; }
-  res.textContent = "probando...";
-  let rem;
-  try {
-    rem = await nubeLeer(c);
-  } catch (e) {
-    res.textContent = e.message;
-    return;
-  }
-  c.sha = rem.sha;
-
-  const nRem = contar(rem.datos);
-  const nLoc = contar(estado);
-  res.textContent = "";
-
-  const linea = document.createElement("div");
-  linea.innerHTML = "en el repo: <b>" + nRem + "</b> sitios · aquí: <b>" + nLoc + "</b> sitios";
-  res.appendChild(linea);
-
-  const caja = document.createElement("div");
-  caja.style.cssText = "display:flex; gap:8px; margin-top:11px";
-
-  const bajar = document.createElement("button");
-  bajar.type = "button";
-  bajar.textContent = "usar los del repo";
-  bajar.onclick = () => {
-    estado = rem.datos;
-    guardarLocal();
-    localStorage.removeItem(CLAVE_PEND);
-    setCfgNube(c);
-    pintar();
-    $("#dlg-nube").close();
-    aviso("bajados " + nRem + " sitios del repo");
-  };
-
-  const subir = document.createElement("button");
-  subir.type = "button";
-  subir.textContent = "subir los míos";
-  subir.style.cssText = "background:var(--acento); border-color:var(--acento); color:#fff";
-  subir.onclick = async () => {
-    subir.disabled = true;
-    subir.textContent = "subiendo...";
-    try {
-      const sha = await nubeEscribir(c, estado, rem.sha, "datos: conectar dispositivo");
-      c.sha = sha;
-      localStorage.removeItem(CLAVE_PEND);
-      setCfgNube(c);
-      $("#dlg-nube").close();
-      aviso("subidos " + nLoc + " sitios al repo");
-    } catch (e) {
-      subir.disabled = false;
-      subir.textContent = "subir los míos";
-      linea.textContent = e.message;
-    }
-  };
-
-  caja.append(bajar, subir);
-  res.appendChild(caja);
+$("#b-nube").onclick = async () => {
+  if (subiendo) { aviso("subiendo..."); return; }
+  aviso("sincronizando");
+  await cargarNube();
+  if (!subiendo) aviso("al día");
 };
 
 $("#q").addEventListener("input", (e) => buscar(e.target.value));
@@ -1070,17 +907,7 @@ if (temaGuardado) document.documentElement.dataset.tema = temaGuardado;
 else if (window.matchMedia("(prefers-color-scheme: light)").matches)
   document.documentElement.dataset.tema = "claro";
 
-if (location.hash.startsWith("#nube=")) {
-  const t = decodeURIComponent(location.hash.slice(6)).trim();
-  if (t) {
-    setCfgNube({ token: t, sha: null });
-    localStorage.removeItem(CLAVE_PEND);
-    history.replaceState(null, "", location.pathname + location.search);
-    aviso("conectado a la nube");
-  }
-}
-
-estadoNube(cfgNube() ? (localStorage.getItem(CLAVE_PEND) ? "subiendo" : "ok") : "off");
+estadoNube(localStorage.getItem(CLAVE_PEND) ? "subiendo" : "ok");
 cargar();
 pintar();
 clima();
