@@ -15,50 +15,38 @@ Página de inicio personal. Tus sitios, en un solo lugar. Un solo archivo, sin b
 
 ## Guardar en la nube (multi-dispositivo)
 
-Sin esto, lo que edites vive solo en el navegador donde lo editaste. Con esto, cada cambio se
-commitea a `datos.json` y aparece en el celular y en cualquier navegador.
+**Ya está conectado. No hay nada que configurar, en ningún dispositivo.**
 
-**Leer no necesita nada.** En cualquier dispositivo abres la URL y ves tus sitios: la página
-lee `datos.json` del repo en cada carga. El token solo hace falta para **escribir** desde ese
-dispositivo.
+Cada alta, edición, borrado o arrastre se guarda en `datos.json` del repo 1.2 s después del
+último cambio, con un commit `datos: fecha`. El punto del botón de nube dice el estado: verde
+al día, azul subiendo, rojo sin conexión (clic para reintentar).
 
-**Una sola vez por dispositivo que vaya a editar:**
-
-1. Abre https://github.com/settings/personal-access-tokens/new
-2. Nombre: `inicio`. Expiración: la que quieras (o sin expirar).
-3. **Repository access** → Only select repositories → `inicio`.
-4. **Permissions** → Repository permissions → **Contents: Read and write**. Nada más.
-5. Generate token y copia el `github_pat_...`.
-6. En la página, botón de nube (abajo, junto al tema) → pega el token → **conectar**.
-
-También se puede con un enlace, sin abrir el diálogo:
+**Cómo está montado, y por qué así:**
 
 ```
-https://sanluispropublicidad-ai.github.io/inicio/#nube=github_pat_...
+navegador  →  ooaz-inicio.vercel.app/api/datos  →  api.github.com  →  datos.json
+              (token de GitHub vive aquí)          (nunca en el navegador)
 ```
 
-Guarda el token, limpia la barra de direcciones y conecta. Útil para configurar el celular sin
-teclear nada.
+- La función está en `api/datos.js`, desplegada en Vercel como `ooaz-inicio`.
+- El token de GitHub es una variable de entorno del servidor. **Nunca llega al navegador**, así
+  que no puede robarlo un script de la página ni un CDN comprometido.
+- `GET` lee `datos.json` con el `sha` actual. `PUT` valida el esquema y escribe.
+- El endpoint solo responde al origen de la página (`sanluispropublicidad-ai.github.io`) y solo
+  escribe ese archivo de ese repo. Una URL `javascript:` en un sitio se rechaza con 400.
+- Si el endpoint no responde, la página cae a leer `datos.json` de Pages: sigues viendo tus
+  sitios, solo no puedes guardar hasta que vuelva.
 
-Al conectar te muestra cuántos sitios hay en el repo y cuántos aquí. Elige **usar los del
-repo** o **subir los míos**.
+**Qué pasa si dos dispositivos editan a la vez:** el segundo recibe `409`, relee, **fusiona**
+—une categorías por nombre y sitios por URL, sin duplicar— y reescribe. Verificado con 8
+pruebas sobre la función de fusión.
 
-Desde ahí, cada alta, edición, borrado o arrastre se sube solo (1.4 s después del último
-cambio) con un commit `datos: fecha`. El punto del botón dice el estado: verde al día, azul
-subiendo, rojo error.
+Límite conocido: sin marcas de tiempo, un sitio que borraste en un dispositivo puede
+reaparecer si el otro todavía lo tenía. El historial de commits permite ver y deshacer
+cualquier caso. Si algún día molesta, se arregla con lápidas (`borrado: true`) en el JSON.
 
-**Qué pasa si dos dispositivos editan a la vez:** el segundo recibe `conflicto` (409/422),
-relee el `sha` nuevo, **fusiona** —une categorías por nombre y sitios por URL, sin duplicar— y
-vuelve a escribir. Verificado con 8 pruebas sobre la función de fusión.
-
-Límite conocido de la fusión: sin marcas de tiempo, un sitio que borraste en un dispositivo
-puede reaparecer si el otro todavía lo tenía. El historial de commits del repo permite ver y
-deshacer cualquier caso. Si algún día molesta, se arregla con lápidas (`borrado: true`) en el
-JSON.
-
-**El token vive en `localStorage` de ese navegador.** Es un token fine-grained limitado a ese
-repo y a Contents: no puede tocar nada más de tu cuenta. Si lo pegas en una computadora
-prestada, bórralo al terminar (borrar datos del sitio).
+**Si hay que cambiar el token:** `vercel env rm GH_TOKEN production` y volver a agregarlo con
+`vercel env add GH_TOKEN production`, luego `vercel deploy --prod`. La página no se toca.
 
 ## Dónde viven los datos
 
@@ -83,28 +71,45 @@ avisa la primera vez). Es a propósito — un cambio que no se sube no existe pa
 
 ## Desplegar cambios
 
+Dos destinos, uno para la página y otro para la API.
+
+**Página (GitHub Pages):**
+
 ```
 bash desplegar.sh
 ```
 
-Copia los archivos a un temporal, hace commit y fuerza el push al repo público
-`sanluispropublicidad-ai/inicio`. Pages reconstruye en ~40 s. El repo `OOAZ` es privado y no
-puede servir Pages gratis; por eso el deploy vive aparte, igual que `mickey-arcade`.
+Clona el repo público `sanluispropublicidad-ai/inicio`, copia el código y hace push normal
+—**respeta el `datos.json` remoto**, para no borrar lo que se editó desde la web—. Pages
+reconstruye en ~40 s. El repo `OOAZ` es privado y no puede servir Pages gratis; por eso el
+deploy vive aparte, igual que `mickey-arcade`.
+
+**API (Vercel):**
+
+```
+VERCEL_TOKEN=... vercel deploy --prod
+```
+
+Solo hace falta si cambia `api/datos.js` o las variables de entorno. La URL es fija:
+`https://ooaz-inicio.vercel.app/api/datos`.
 
 ## Archivos
 
 | Archivo | Qué es |
 |---|---|
-| `index.html` | Todo: estilos, lógica, interfaz. |
-| `datos.json` | Tus categorías y sitios. |
+| `index.html` | Todo el cliente: estilos, lógica, interfaz. |
+| `api/datos.js` | Función serverless en Vercel. Guarda el token de GitHub y escribe `datos.json`. |
+| `vercel.json` | Configuración mínima del proyecto en Vercel. |
+| `datos.json` | Tus categorías y sitios (semilla; el repo es la verdad). |
 | `sw.js` | Service worker: funciona sin internet. |
 | `manifest.webmanifest` | Para instalarla como app. |
 | `icon.svg` | Icono. |
+| `desplegar.sh` | Deploy de la página a GitHub Pages. |
 
 ## Detalles técnicos
 
-- Sin frameworks, sin npm, sin build. Se abre y funciona.
+- Sin frameworks, sin npm, sin build en el cliente. Se abre y funciona.
 - Favicons vía `google.com/s2/favicons` — sin API key. Si falla, cae a la inicial del nombre con color derivado del dominio.
 - Clima opcional vía Open-Meteo (sin key), solo si haces clic en la línea del clima y concedes ubicación.
 - Tema oscuro por defecto, respeta `prefers-color-scheme`, toggle manual persistente.
-- Funciona desde `file://` también, aunque sin service worker ni `datos.json` remoto.
+- Funciona desde `file://` también, aunque sin service worker, sin nube y sin `datos.json` remoto.

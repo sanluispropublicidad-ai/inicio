@@ -156,16 +156,49 @@ body.editando .tarjeta .acc{display:flex}
 }
 #acciones button:hover{background:var(--tarjeta-h); color:var(--texto)}
 #acciones button.activo{background:var(--acento); color:#fff}
-#b-nube{position:relative}
-#b-nube::after{
-  content:""; position:absolute; top:5px; right:5px; width:6px; height:6px; border-radius:50%;
-  background:var(--texto3); transition:background .2s;
+#b-nube{position:relative; overflow:visible}
+#b-nube .ico-nube,#b-nube .ico-check{
+  position:absolute; top:50%; left:50%; margin:-8.5px 0 0 -8.5px;
+  transition:opacity .18s, transform .18s;
 }
-#b-nube.ok::after{background:var(--acento2)}
-#b-nube.subiendo::after{background:var(--acento); animation:pulso 1s infinite}
-#b-nube.error::after{background:#e24b4a}
-#b-nube.off::after{background:transparent}
-@keyframes pulso{50%{opacity:.25}}
+#b-nube .ico-check{opacity:0; transform:scale(.4); stroke:var(--acento2); stroke-width:2.8}
+#b-nube .anillo{
+  position:absolute; inset:3px; border-radius:50%; pointer-events:none;
+  border:2px solid transparent;
+}
+#b-nube.guardando .ico-nube{animation:flota .85s ease-in-out infinite; color:var(--acento)}
+#b-nube.guardando .anillo{
+  border-color:rgba(76,154,255,.22); border-top-color:var(--acento);
+  animation:gira .75s linear infinite;
+}
+#b-nube.guardado .ico-nube{opacity:0; transform:scale(.6)}
+#b-nube.guardado .ico-check{
+  opacity:1; transform:scale(1);
+  animation:popCheck .5s cubic-bezier(.2,1.7,.4,1) both;
+}
+#b-nube.guardado .anillo{
+  border-color:var(--acento2);
+  animation:onda .7s ease-out forwards;
+}
+#b-nube.error .ico-nube{color:#e24b4a}
+#b-nube.error .anillo{border-color:rgba(226,75,74,.4)}
+#b-nube.error{animation:sacudida .4s ease-in-out}
+@keyframes flota{50%{transform:translateY(-2.5px)}}
+@keyframes gira{to{transform:rotate(360deg)}}
+@keyframes popCheck{0%{transform:scale(.3); opacity:0} 55%{transform:scale(1.25); opacity:1} 100%{transform:scale(1)}}
+@keyframes onda{0%{transform:scale(.55); opacity:.95} 100%{transform:scale(1.65); opacity:0}}
+@keyframes sacudida{0%,100%{transform:translateX(0)} 25%{transform:translateX(-2px)} 75%{transform:translateX(2px)}}
+@media (prefers-reduced-motion:reduce){
+  #b-nube.guardando .ico-nube,#b-nube.guardando .anillo,#b-nube.error,
+  #b-nube.guardado .ico-check,#b-nube.guardado .anillo{animation:none}
+}
+.tarjeta.destacada{animation:destello 1.2s ease-out}
+@keyframes destello{
+  0%{box-shadow:0 0 0 0 rgba(76,154,255,.6); border-color:var(--acento); transform:scale(1.04)}
+  70%{box-shadow:0 0 0 12px rgba(76,154,255,0); border-color:var(--acento)}
+  100%{box-shadow:0 0 0 0 rgba(76,154,255,0); border-color:var(--borde); transform:scale(1)}
+}
+@media (prefers-reduced-motion:reduce){.tarjeta.destacada{animation:none}}
 #acciones .sep{width:1px; height:20px; background:var(--borde); margin:0 2px}
 #acciones svg{width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.7;
   stroke-linecap:round; stroke-linejoin:round}
@@ -252,8 +285,10 @@ dialog button:hover{filter:brightness(1.12)}
     <svg viewBox="0 0 24 24"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M4 21h16"/></svg>
   </button>
   <span class="sep"></span>
-  <button id="b-nube" class="off" title="guardar en la nube (GitHub)">
-    <svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1 0-8 5.5 5.5 0 0 1 10.6-1.5A3.5 3.5 0 0 1 18 18H7z"/></svg>
+  <button id="b-nube" class="ok" title="al día en la nube">
+    <svg class="ico-nube" viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1 0-8 5.5 5.5 0 0 1 10.6-1.5A3.5 3.5 0 0 1 18 18H7z"/></svg>
+    <svg class="ico-check" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg>
+    <span class="anillo"></span>
   </button>
   <button id="b-tema" title="tema">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
@@ -357,6 +392,7 @@ let estado = null;
 let editando = false;
 let resultados = [];
 let sel = -1;
+let destacar = null;
 
 const $ = (s) => document.querySelector(s);
 const el = (t, c) => { const x = document.createElement(t); if (c) x.className = c; return x; };
@@ -421,14 +457,29 @@ const API = "https://ooaz-inicio.vercel.app/api/datos";
 let subiendo = false;
 let timerSubida = null;
 let shaNube = null;
+let yaCargo = false;
+
+let timerCheck = null;
 
 function estadoNube(t) {
   const b = $("#b-nube");
-  b.className = t;
+  clearTimeout(timerCheck);
+  b.className = t === "subiendo" ? "guardando" : t;
   b.title = t === "ok" ? "al día en la nube"
-    : t === "subiendo" ? "subiendo cambios..."
+    : t === "subiendo" ? "guardando cambios..."
     : t === "error" ? "sin conexión con la nube (clic para reintentar)"
     : "nube";
+}
+
+function animarGuardado() {
+  const b = $("#b-nube");
+  b.className = "guardado";
+  b.title = "guardado";
+  clearTimeout(timerCheck);
+  timerCheck = setTimeout(() => {
+    b.className = "ok";
+    b.title = "al día en la nube";
+  }, 1700);
 }
 
 async function nubeLeer() {
@@ -500,7 +551,7 @@ async function subirAhora() {
     }
     shaNube = sha;
     localStorage.removeItem(CLAVE_PEND);
-    estadoNube("ok");
+    animarGuardado();
   } catch (e) {
     estadoNube("error");
     aviso("no se guardó en la nube: " + e.message);
@@ -512,12 +563,15 @@ async function subirAhora() {
 async function cargarNube() {
   try {
     const rem = await nubeLeer();
+    const antes = yaCargo ? JSON.stringify(estado) : null;
     shaNube = rem.sha;
     if (localStorage.getItem(CLAVE_PEND)) { subirAhora(); return true; }
     estado = rem.datos;
     guardarLocal();
     pintar();
-    estadoNube("ok");
+    yaCargo = true;
+    if (antes && antes !== JSON.stringify(estado)) animarGuardado();
+    else estadoNube("ok");
     return true;
   } catch (e) {
     estadoNube("error");
@@ -531,6 +585,10 @@ function crearTarjeta(sitio, cat) {
   a.title = sitio.n + " — " + dominio(sitio.u);
   a.draggable = editando;
   a.dataset.cat = cat;
+  if (destacar && sitio.u === destacar) {
+    a.classList.add("destacada");
+    destacar = null;
+  }
 
   const img = el("img", "ico");
   img.src = favicon(sitio.u, 64);
@@ -597,6 +655,7 @@ function crearTarjeta(sitio, cat) {
     const movido = cOri.sitios.splice(idx, 1)[0];
     const destinoIdx = cDes.sitios.indexOf(sitio);
     cDes.sitios.splice(destinoIdx, 0, movido);
+    destacar = movido.u;
     guardar(); pintar();
   });
   return a;
@@ -751,6 +810,7 @@ $("#form").addEventListener("submit", (e) => {
   }
   catObj.sitios.push({ n: nom, u: url });
 
+  destacar = url;
   guardar(); pintar();
   aviso(original ? "actualizado: " + nom : "agregado: " + nom);
 });
